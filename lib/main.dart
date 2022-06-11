@@ -3,8 +3,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-
-
 void main() {
   runApp(const MyApp());
 }
@@ -18,40 +16,99 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  final _random = new Random();
+  // ------- change these defaults as needed -----------
 
-  int getRandomInt ( int min, int max ) {
-    
-     // method to return a randm # within a given range
+  String?         _uiInfo       = '- no data yet -';
+  final int?      _min          = 0;  // low end of integer range
+  final int?      _max          = 12; // high end on int range
+  final int?      _itemCount    = 5;  // how many #s to grab?  
 
-    Random rnd;
-    int r;
+
+
+
+
+  // ------- meaty method below ------------------------  
+
+  int getRandomInt ( int min, int max, [ String exclude = ''] ) {
+
+     // Method to return a random int within a given range.
+     // Also accepts an "exclude" parameter, of numbers to exclude
+     // (as a string, with integers separated by a comma)
+
+    Random    _rnd;
+    int       _r = 0;
+    bool?    _rNoGood = true;
+
+    List<String> excludeArray = exclude.split(',');
+    int      i = 0;
+    bool?    _excludeFound = false;
 
     max++; // increment upper range by 1
 
-    rnd = Random();
-    r = min + rnd.nextInt(max - min);
-    return r;
+    _rnd = Random();
+    while ( _rNoGood == true ) {
+      _r = min + _rnd.nextInt(max - min);
+      // check excludes
+      if ( exclude != '' ) {
+        _excludeFound = false;
+        // loop through excludes... if you find it, exit
+        for ( i=0; i < excludeArray.length; i++ ) {
+          if( excludeArray[i] == _r.toString()) {
+            _excludeFound = true; 
+            // print ('excluded # ${excludeArray[i]} found!'); 
+          }
+        }
+        if( _excludeFound == false ) {
+          // because the # generated was not in excluded list,
+          // the # is good!!
+          _rNoGood = false;
+        }
+        else {
+          // # was found in  excluded list, so the # is no good
+          _rNoGood = true;
+        }
+      }
+      else {
+        // print ('no excluded list!');
+        // because there is no excluded list,
+        // the # found must be valid
+        _rNoGood = false;  
+      }
+    }
+    return _r;
   }
 
-  String?         _uiInfo       = '- no data yet -';
-  final int?      _min          = 0;
-  final int?      _max          = 10;
-  final int?      _itemCount    = 11;
+
+
+
+
+
+
+
+  // ------- helper method below ------------------------  
 
   void _go() {
+
+    // Method executes when "go!" button clicked..
+
     int i = 0;
-    String? str = 'Generating $_itemCount random numbers\nranging from $_min to $_max.\n(View console for results...)';
+    String? str = 'Generating $_itemCount random numbers\nranging from $_min to $_max. (Possibly\nwith some excluded numbers --\ncheck source code.)\n(View console for results...)';
     setState(() {
       _uiInfo = str;
     });
     print (' --- Go! ---');
     for(i=0; i < _itemCount!; i++ ){
-      print ( '${(i+1).toString() }. ${getRandomInt(_min!, _max!).toString()}');
+      print ( '${(i+1).toString() }. ${getRandomInt(_min!, _max!, '0,1,2,5,10,11').toString()}');
     }
   }
 
-  // This widget is the root of your application.
+
+
+
+
+
+  // ------- the visible ui ----------------------------
+
    @override
   Widget build(BuildContext context) {
     return MaterialApp(
